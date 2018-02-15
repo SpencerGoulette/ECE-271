@@ -16,6 +16,6 @@ void LCD_WriteChar(uint8_t* ch, bool point, bool colon, uint8_t position);
 static void LCD_Conv_Char_Seg(uint8_t* c,bool point,bool colon, uint8_t* digit);
 void LCD_Display_Name(void);
 int power(int number, int pow);
-double Keypad_Print();
+double Keypad_Print(void);
 
 #endif /* __STM32L476G_DISCOVERY_LCD_H */

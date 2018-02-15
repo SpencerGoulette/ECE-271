@@ -77,8 +77,6 @@ uint8_t positionCounter;
 uint8_t mult1;
 uint8_t mult2;
 uint16_t previousInput;
-char str[7];
-double returnTotal = 0;
 
 #define BAR0_ON  t_bar[1] |= 8
 #define BAR0_OFF t_bar[1] &= ~8
@@ -271,8 +269,12 @@ int power(int number, int pow)	//Created Power Function to make it easier to do 
 	return total;
 }
 
-double Keypad_Print()	//Function that checks for press of button on keypad and prints that button to LCD
+double Keypad_Print(void)	//Function that checks for press of button on keypad and prints that button to LCD
 {
+	char str[7];
+	char* ptr = &str[0];
+	double totalNumber = 0;
+	int i;
 	RCC->AHB2ENR |= RCC_AHB2ENR_GPIOEEN;	//Enables Clock of port E
 	
 	GPIOA->MODER &= ~(GPIO_MODER_MODE1 | GPIO_MODER_MODE2 | GPIO_MODER_MODE3 | GPIO_MODER_MODE5);	//Set Pin 1, 2, 3, and 5 as Digital Output (00)
@@ -281,7 +283,6 @@ double Keypad_Print()	//Function that checks for press of button on keypad and p
 	GPIOE->MODER |= (GPIO_MODER_MODE10_0 | GPIO_MODER_MODE11_0 | GPIO_MODER_MODE12_0 | GPIO_MODER_MODE13_0);
 	
 	positionCounter = 0;	//Counter to use to know where to print character on LCD
-	
 	while(1)
 	{
 		for(row = 0; row < 4; row++)	//Goes through each row
@@ -307,7 +308,7 @@ double Keypad_Print()	//Function that checks for press of button on keypad and p
 						{
 							step = 0;
 						}
-						if(col - step + row*4 != 12 && col - step + row*4 != 14)	//Checking to see if anything, except the '*' and '#' key are pressed
+						if(col - step + row*4 != 14)	//Checking to see if anything, except the '*' and '#' key are pressed
 						{
 							LCD_WriteChar((uint8_t*)(p + col - step + row*4), 0, 0, positionCounter);	//Writes the key to the LCD
 							str[positionCounter] = *(p + col - step + row*4);
@@ -315,7 +316,6 @@ double Keypad_Print()	//Function that checks for press of button on keypad and p
 							{
 								positionCounter++;	//Then increments position on LCD for next print
 							}
-							previousInput = col - step + row*4;	//previousInput is not used yet in prgram but will be for the '#' key
 						}
 						else
 						{
@@ -325,16 +325,16 @@ double Keypad_Print()	//Function that checks for press of button on keypad and p
 								{
 									positionCounter--;
 								}
-								str[positionCounter] = *(p + 16);
 								LCD_WriteChar((uint8_t*)(p + 16), 0, 0, positionCounter); //Prints space in previous position
+								str[positionCounter] = '\0';
 							}
-							if(col - step + row*4 == 14)
+							if(col - step + row*4 == 14)	//If '#' is pressed, then decrement position and print a space
 							{
-								for(j = 0; str[j] != '\0'; j++)
+								for(i = 0; i < positionCounter; i++)
 								{
-									returnTotal = returnTotal * 10 + str[j] - '0';
+									totalNumber = totalNumber * 10 + *(ptr + i) - '0';
 								}
-								return returnTotal;
+								return totalNumber;
 							}
 						}
 						while((GPIOA->IDR & (power(2, col+1))) == 0);		//Waits for the button to be released

@@ -5,20 +5,22 @@ Spring 2018
 Name
 -----------
 ```
-WRITE YOUR NAME HERE
+Spencer Goulette
 ```
 
 Summary of Lab Status
 -------
-- [ ] Pre-lab Assignment (2 points) 
-- [ ] Basic in-lab assignments (15 points) 
-- [ ] Something cool (3 points): 
+- [X] Pre-lab Assignment (2 points) 
+- [X] Basic in-lab assignments (15 points) 
+- [X] Something cool (3 points): 
 
 What is your something cool?
 -------
+1. You can enter the degrees you want the stepper motor to rotate using the keypad and pressing '#' when you are done.
 
 Post-lab Questions
 -------
+1. 
 
 Lab Credits
 -------
