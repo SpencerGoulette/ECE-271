@@ -45,14 +45,9 @@ loopj	CMP	r4, #3	;The 4 cases of Full Step loop
 		BGT done2
 		
 loopk	CMP r5, #1400	;Time Delay
-		BGT loopl
+		BGT done1
 		ADD r5, r5, #1
 		B loopk
-		
-loopl	CMP r6, #1400	;Time Delay
-		BGT done1
-		ADD r6, r6, #1
-		B loopl
 
 done1	LDR r1, [r0, #GPIO_ODR]	;Sets 2, 3, 6, and 7 ODR to 0
 		AND r1, r1, #0
@@ -62,7 +57,6 @@ done1	LDR r1, [r0, #GPIO_ODR]	;Sets 2, 3, 6, and 7 ODR to 0
 		MOV r6, #0
 		
 		CMP r4, #0	;Checks first case if it is equal to 0
-		BEQ if1
 		BNE alt1
 		
 if1		LDR r1, [r0, #GPIO_ODR]	;If r4 == 0, set ODR 2 and 7
@@ -71,7 +65,6 @@ if1		LDR r1, [r0, #GPIO_ODR]	;If r4 == 0, set ODR 2 and 7
 		STR r1, [r0, #GPIO_ODR]
 
 alt1	CMP r4, #1	;Checks second case if it is equal to 1
-		BEQ if2
 		BNE alt2
 		
 if2		LDR r1, [r0, #GPIO_ODR]	;If r4 == 0, set ODR 2 and 6
@@ -80,7 +73,6 @@ if2		LDR r1, [r0, #GPIO_ODR]	;If r4 == 0, set ODR 2 and 6
 		STR r1, [r0, #GPIO_ODR]
 		
 alt2	CMP r4, #2	;Checks third case if it is equal to 2
-		BEQ if3
 		BNE alt3
 		
 if3		LDR r1, [r0, #GPIO_ODR]	;If r4 == 0, set ODR 6 and 3
@@ -89,7 +81,6 @@ if3		LDR r1, [r0, #GPIO_ODR]	;If r4 == 0, set ODR 6 and 3
 		STR r1, [r0, #GPIO_ODR]
 		
 alt3	CMP r4, #3	;Checks fourth case if it is equal to 3
-		BEQ if4
 		BNE alt4
 		
 if4		LDR r1, [r0, #GPIO_ODR]	;If r4 == 0, set ODR 3 and 7

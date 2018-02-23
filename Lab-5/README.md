@@ -5,13 +5,13 @@ Spring 2018
 Name
 -----------
 ```
-WRITE YOUR NAME HERE
+Spencer Goulette
 ```
 
 Summary of Lab Status
 -------
-- [ ] Pre-lab Assignment (2 points) 
-- [ ] Basic in-lab assignments (15 points) 
+- [X] Pre-lab Assignment (2 points) 
+- [X] Basic in-lab assignments (15 points) 
 - [ ] Something cool (3 points): 
 
 What is your something cool?
@@ -19,10 +19,11 @@ What is your something cool?
 
 Post-lab Questions
 -------
+1. There are no post lab questions
 
 Lab Credits
 -------
-* Did you received any help from someone other than Prof. Zhu and lab teaching assistants?
+* Did you received any help from someone other than Prof. Zhu and lab teaching assistants? No
 
 Suggestions and Comments
 -------
