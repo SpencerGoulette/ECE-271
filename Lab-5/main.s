@@ -7,8 +7,10 @@
 	INCLUDE core_cm4_constants.s		; Load Cortex-M4 Definitions
 	INCLUDE stm32l476xx_constants.s     ; Load STM32L4 Definitions 
 
-	AREA    main, CODE, READONLY
+	AREA    main, CODE
 	EXPORT	__main				; make __main visible to linker
+	IMPORT	keyPad
+	ALIGN
 	ENTRY			
 				
 __main	PROC
@@ -32,11 +34,17 @@ __main	PROC
 		STR r1, [r0, #GPIO_MODER]
 	
 		; Sets values for for loops
-		MOV r2, #511
-		MOV r3, #0
+
+inf		MOV r0, #0	;Using r0 as the argument for Keypad
+		BL	keyPad	;Calling Keypad function to get degrees to rotate
+		MOV r2, r0	;Assigning r2 to return value from Keypad 
+		MOV r3, #0	;Setting registers to zero for program
 		MOV r4, #0
 		MOV	r5, #0
 		MOV r6, #0
+		MOV r7, #0
+		
+		LDR r0, =GPIOB_BASE
 		
 loopi	CMP r3, r2	;rotations loop
 		BGT done3
@@ -44,10 +52,15 @@ loopi	CMP r3, r2	;rotations loop
 loopj	CMP	r4, #3	;The 4 cases of Full Step loop
 		BGT done2
 		
-loopk	CMP r5, #1400	;Time Delay
-		BGT done1
+loopk	CMP r5, #200	;Time Delay
+		BGT loopl
 		ADD r5, r5, #1
 		B loopk
+		
+loopl	CMP r6, #1400	;Time Delay
+		BGT done1
+		ADD r6, r6, #1
+		B loopl
 
 done1	LDR r1, [r0, #GPIO_ODR]	;Sets 2, 3, 6, and 7 ODR to 0
 		AND r1, r1, #0
@@ -100,13 +113,15 @@ done3	MOV r3, #0	;Clear ODR
 		AND r1, r1, #0
 		STR r1, [r0, #GPIO_ODR]
 		
-stop 	B 		stop     		; dead loop & program hangs here
+		B inf	;infinite while loop
+		
+stop 	B 		stop     ; dead loop & program hangs here
 
-	ENDP
+		ENDP
 					
-	ALIGN			
+		ALIGN			
 
-	AREA    myData, DATA, READWRITE
-	ALIGN
+		AREA    myData, DATA, READWRITE
+		ALIGN
 array	DCD   1, 2, 3, 4
-	END
+		END

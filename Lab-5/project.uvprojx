@@ -405,6 +405,26 @@
               <FileType>2</FileType>
               <FilePath>.\core_cm4_constants.s</FilePath>
             </File>
+            <File>
+              <FileName>LCD.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\LCD.c</FilePath>
+            </File>
+            <File>
+              <FileName>LCD.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\LCD.h</FilePath>
+            </File>
+            <File>
+              <FileName>stm32l476xx.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\stm32l476xx.h</FilePath>
+            </File>
+            <File>
+              <FileName>keyPad.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\keyPad.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
