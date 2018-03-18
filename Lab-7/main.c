@@ -35,7 +35,7 @@ int main(void)
 	
 	sysTick_Initialize(1000);	//Initializes SysTick
 		
-	// Enable the clock to GPIO Port B	
+	// Enable the clock to GPIO Port E	
   RCC->AHB2ENR |= RCC_AHB2ENR_GPIOEEN;
 		
 	// MODER:00: Input mode,              01: General purpose output mode
@@ -46,7 +46,18 @@ int main(void)
 	GPIOE->AFR[1] &= ~GPIO_AFRH_AFSEL8; // Clear AFRH8
 		
 	GPIOE->AFR[1] |= GPIO_AFRH_AFSEL8_0; // Set the Alternative Function to TIM1_CH1N
-	
+		
+	// Enable the clock to GPIO Port A	
+  RCC->AHB2ENR |= RCC_AHB2ENR_GPIOAEN;   
+
+	// MODER:00: Input mode,              01: General purpose output mode
+  //       10: Alternate function mode, 11: Analog mode (reset state)
+  GPIOA->MODER &= ~0x00000CFF;   // Clear bits 0-7, and bit 10 and bit 11
+  
+  // PUPDR:00: NO PUPD (reset state),   01: Pullup
+  //       10: Pulldown,                11: Reserved
+	GPIOA->PUPDR &= ~0x00000CFF;  // Clear bits 0-7, and bit 10 and bit 11
+	GPIOA->PUPDR |= 0x000008AA; // Set bits 1, 3, 5, 7, and 11
 	
 	TIM1_Init(); // Initializing TIMER 1
 		
@@ -65,18 +76,40 @@ int main(void)
 		delay(10);	// Delay 1 ms
 	}
 	
-	switchCase = 1999;
+	switchCase = 1999;	// Changing Period to run the motor
 	TIM1_Init();
-	brightness = 140;	// 0
-	TIM1->CCR1 = brightness;
+	for(;brightness <= 140; brightness++)	// 0 Degrees
+	{
+		delay(10);
+		TIM1->CCR1 = brightness;
+	}
 	delay(1000);
-	brightness = 50;	// -90
-	TIM1->CCR1 = brightness;
+	for(;brightness >= 50; brightness--) // 90 Degrees
+	{
+		delay(10);
+		TIM1->CCR1 = brightness;
+	}
 	delay(1000);
-	brightness = 250;	// 90
-	TIM1->CCR1 = brightness;
+	for(;brightness <= 250; brightness++) // -90 Degrees
+	{
+		delay(10);
+		TIM1->CCR1 = brightness;
+	}
 	delay(1000);
-
+	
+	while(1)	// Joystick Controls both brightness of motor and 
+	{
+		if((GPIOA->IDR & 0x00000008) && (brightness < 300))	// Increase Brightness and Decrease Degrees
+		{
+			brightness += 1;
+		}
+		if((GPIOA->IDR & 0x00000020) && (brightness > 0)) // Decrease Brightness and Increase Degrees
+		{
+			brightness -= 1;
+		}
+		TIM1->CCR1 = brightness;
+		delay(50);
+	}
 }	
 
 void delay(uint32_t nTime)	//Delay the nTime passed in in milliseconds
