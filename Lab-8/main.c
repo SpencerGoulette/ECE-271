@@ -11,6 +11,8 @@
 */
 
 volatile uint32_t pulse_width = 0;
+volatile double timeSpan = 0;
+volatile uint8_t OC = 0;
 volatile uint32_t last_captured = 0;
 volatile uint32_t signal_polarity = 0; // Assume input is low initially
 
@@ -23,7 +25,6 @@ void SysTick_Handler(void);		//The interrupt to create the system delay
 volatile uint32_t TimeDelay;
 
 int main(void){
-	int i;
 	System_Clock_Init();
 	LCD_Initialization();	//Initializes LCD
 	sysTick_Initialize(1999);	//Initializes SysTick
@@ -51,7 +52,7 @@ int main(void){
 	RCC->APB1ENR1 |= RCC_APB1ENR1_TIM4EN;
 	
 	// Set up an appropriate prescaler to slowdown the timer's input clock
-	TIM4->PSC = 15;
+	TIM4->PSC = 159;
 	
 	// Set Auto-reload value to maximum value
 	TIM4->ARR = 0xFFFF; // Maximum 16-bit value
@@ -74,7 +75,7 @@ int main(void){
 		TIM4->CCER |= (TIM_CCER_CC1P | TIM_CCER_CC1NP); // Both edges generate interrupts
 		
 		// Program the input prescaler: clear prescaler to capture each transition
-		TIM4->CCMR1 &= ~(TIM_CCMR1_IC1PSC);
+		TIM4->CCMR1 &= ~TIM_CCMR1_IC1PSC;
 		
 		// Enable capture for channel 1
 		// CC1E: 0 = disabled, 1 = enabled
@@ -98,9 +99,9 @@ int main(void){
 		while(1)
 		{
 			GPIOE->ODR |= GPIO_ODR_OD11;	//Trigger the sensor to get the distance
-			delay(1);
+			delay(2);
 			GPIOE->ODR &= ~GPIO_ODR_OD11;
-			delay(1);
+			delay(2);
 		}
 }
 
@@ -118,14 +119,14 @@ void System_Clock_Init(void){
 
   // Wait till HSI is used as system clock source 
   while ((RCC->CFGR & (uint32_t)RCC_CFGR_SWS) == 0 );
-		
+	
+	return;
 }
 
 void TIM4_IRQHandler(void)
 {
-	char str[6];
 	uint32_t current_captured;
-	uint32_t OC;
+	char str[6];
 	if((TIM4->SR & TIM_SR_CC1IF) != 0)	// Check interrupt flag set
 	{
 		// Reading CCR1 clears CC1IF interrupt flag
@@ -136,11 +137,12 @@ void TIM4_IRQHandler(void)
 		
 		if(signal_polarity == 0) // Calculate only when the current input is low
 		{
-			pulse_width = current_captured - last_captured; // Assume up-counting
+			pulse_width = (current_captured - last_captured); // Assume up-counting
+			timeSpan = ((pulse_width + ((1 + 65535) * OC))/100);
 			//sprintf(str, "%d", (pulse_width / 148));	// Give distance in inches
-			sprintf(str, "%d", (1.0/1000000 * (pulse_width + (1 + TIM4->ARR) * OC))); // Give Time Span in seconds
-			LCD_DisplayString(str);	//Display
-			TIM4->SR &= ~TIM_SR_UIF;
+			sprintf(str, "%d", (int)timeSpan); // Give Time Span in seconds
+			LCD_DisplayString((uint8_t*)str);	//Display
+			TIM4->CNT = 0;
 			OC = 0;
 		}
 		
