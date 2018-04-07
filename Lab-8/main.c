@@ -52,7 +52,7 @@ int main(void){
 	RCC->APB1ENR1 |= RCC_APB1ENR1_TIM4EN;
 	
 	// Set up an appropriate prescaler to slowdown the timer's input clock
-	TIM4->PSC = 159;
+	TIM4->PSC = 15;
 	
 	// Set Auto-reload value to maximum value
 	TIM4->ARR = 0xFFFF; // Maximum 16-bit value
@@ -99,9 +99,9 @@ int main(void){
 		while(1)
 		{
 			GPIOE->ODR |= GPIO_ODR_OD11;	//Trigger the sensor to get the distance
-			delay(2);
+			delay(1);
 			GPIOE->ODR &= ~GPIO_ODR_OD11;
-			delay(2);
+			delay(1);
 		}
 }
 
@@ -139,8 +139,8 @@ void TIM4_IRQHandler(void)
 		{
 			pulse_width = (current_captured - last_captured); // Assume up-counting
 			timeSpan = ((pulse_width + ((1 + 65535) * OC))/100);
-			//sprintf(str, "%d", (pulse_width / 148));	// Give distance in inches
-			sprintf(str, "%d", (int)timeSpan); // Give Time Span in seconds
+			sprintf(str, "%d", (pulse_width / 148));	// Give distance in inches
+			//sprintf(str, "%d", (int)timeSpan); // Give Time Span in seconds
 			LCD_DisplayString((uint8_t*)str);	//Display
 			TIM4->CNT = 0;
 			OC = 0;
