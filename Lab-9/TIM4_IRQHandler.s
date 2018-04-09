@@ -7,17 +7,15 @@
 	INCLUDE core_cm4_constants.s		; Load Cortex-M4 Definitions
 	INCLUDE stm32l476xx_constants.s     ; Load STM32L4 Definitions 
 
-	AREA    main, CODE
+	AREA	handler, CODE
 	EXPORT	TIM4_IRQHandler
 	IMPORT	timespan
 	IMPORT	lastcounter
 	IMPORT	overflow   
 	IMPORT	keyPad
-	ALIGN
-	ENTRY			
+	ALIGN		
 
 TIM4_IRQHandler PROC
-				EXPORT		TIM4_IRQHandler
 					
 				PUSH {r4, r6, r10, lr}
 				
@@ -34,13 +32,13 @@ TIM4_IRQHandler PROC
 				BIC r2, r2, #TIM_SR_UIF	; Clear update event flag
 				STR r2, [r0, #TIM_SR]	; Update status register
 			
-check_CCFlag	AND r2, r2, #TIM_SR_UIF`; Check capture event flag
+check_CCFlag	AND r2, r2, #TIM_SR_UIF ; Check capture event flag
 				CBZ r2, exit			; Compare and branch on zero
 				
 				LDR r0, =TIM4_BASE		; Load base memory address
 				LDR r1, [r0, #TIM_CCR1]	; Read the new captured value
 				
-				LDR r2, =lastCounter
+				LDR r2, =lastcounter
 				LDR r0, [r2]			; Load the last counter value
 				STR r1, [r2]			; Save the new counter value
 				CBZ r0, clearOverflow	; compare and branch on zero
@@ -64,7 +62,4 @@ exit			POP {r4, r6, r10, pc}
 		AREA    myData, DATA, READWRITE
 		ALIGN
 array	DCD    1, 2, 3, 4
-timespan	DCD    0	; Pulse width
-lastcounter	DCD    0	; Timer counter value of last capture event
-overflow	DCD	   0	; Counter for the number of overflows
 		END

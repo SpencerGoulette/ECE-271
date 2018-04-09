@@ -7,11 +7,10 @@
 	INCLUDE core_cm4_constants.s		; Load Cortex-M4 Definitions
 	INCLUDE stm32l476xx_constants.s     ; Load STM32L4 Definitions 
 
-	AREA    main, CODE
-	EXPORT HSI_init
+	AREA    hsi, CODE
+	EXPORT	HSI_init
 	IMPORT	keyPad
-	ALIGN
-	ENTRY			
+	ALIGN			
 
 HSI_init  PROC
 			
@@ -31,7 +30,7 @@ HSI_init  PROC
 waitHSI	LDR r1, [r0, #RCC_CR]
 		AND r1, r1, #RCC_CR_HSIRDY
 		CMP r1, #0
-		BEQ WaitHSI
+		BEQ waitHSI
 		BX LR
 		ENDP	
 					
@@ -40,7 +39,4 @@ waitHSI	LDR r1, [r0, #RCC_CR]
 		AREA    myData, DATA, READWRITE
 		ALIGN
 array	DCD    1, 2, 3, 4
-timespan	DCD    0	; Pulse width
-lastcounter	DCD    0	; Timer counter value of last capture event
-overflow	DCD	   0	; Counter for the number of overflows
 		END

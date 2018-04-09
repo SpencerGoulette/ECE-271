@@ -9,7 +9,12 @@
 
 	AREA    main, CODE
 	EXPORT	__main				; make __main visible to linker
+	EXPORT	timespan
+	EXPORT	lastcounter
+	EXPORT	overflow	
+	IMPORT	GPIO_init
 	IMPORT	HSI_init
+	IMPORT	TIM4_init
 	IMPORT	TIM4_IRQHandler
 	IMPORT	keyPad
 	ALIGN
@@ -18,51 +23,10 @@
 __main	PROC
 		
 		BL HSI_init
-		; Enable the clock to GPIO Port B	
-		LDR r0, =RCC_BASE
-		LDR r1, [r0, #RCC_AHB2ENR]
-		ORR r1, r1, #RCC_AHB2ENR_GPIOBEN
-		STR r1, [r0, #RCC_AHB2ENR]
+		BL GPIO_init
+		BL TIM4_init
 		
-		; Enable the clock to GPIO Port E	
-		LDR r0, =RCC_BASE
-		LDR r1, [r0, #RCC_AHB2ENR]
-		ORR r1, r1, #RCC_AHB2ENR_GPIOEEN
-		STR r1, [r0, #RCC_AHB2ENR]
-
-		; MODE: 00: Input mode,              01: General purpose output mode
-		;       10: Alternate function mode, 11: Analog mode (reset state)
-		; Setting GPIOB MODER
-		LDR r0, =GPIOB_BASE
-		LDR r1, [r0, #GPIO_MODER]
-		AND r1, #0
-		ORR r1, r1, #GPIO_MODER_MODER6_1
-		STR r1, [r0, #GPIO_MODER]
-		
-		LDR r0, =GPIOE_BASE
-		LDR r1, [r0, #GPIO_MODER]
-		AND r1, #0
-		ORR r1, r1, #GPIO_MODER_MODER11_0
-		STR r1, [r0, #GPIO_MODER]
-		
-		LDR r0, =GPIOB_BASE
-		LDR r1, [r0, #GPIO_PUPDR]
-		AND r1, #4294955007
-		STR r1, [r0, #GPIO_PUPDR]
-		
-		LDR r0, =GPIOB_BASE
-		LDR r1, [r0, #GPIO_MODER]
-		AND r1, #0
-		ORR r1, r1, #GPIO_MODER_MODER6_1
-		STR r1, [r0, #GPIO_MODER]
-		
-		; Enable the clock to GPIO Port E	
-		LDR r0, =RCC_BASE
-		LDR r1, [r0, #RCC_APB1ENR1]
-		ORR r1, r1, #RCC_APB1ENR1_TIM4EN
-		STR r1, [r0, #RCC_APB1ENR1]
-		
-		B inf	;infinite while loop
+inf		B inf	;infinite while loop
 		
 stop 	B 		stop     ; dead loop & program hangs here
 			

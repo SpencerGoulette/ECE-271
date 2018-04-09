@@ -435,6 +435,16 @@
               <FileType>2</FileType>
               <FilePath>.\TIM4_IRQHandler.s</FilePath>
             </File>
+            <File>
+              <FileName>GPIO_init.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>.\GPIO_init.s</FilePath>
+            </File>
+            <File>
+              <FileName>TIM4_init.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>.\TIM4_init.s</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
