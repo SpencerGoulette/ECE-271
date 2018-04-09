@@ -425,6 +425,16 @@
               <FileType>1</FileType>
               <FilePath>.\keyPad.c</FilePath>
             </File>
+            <File>
+              <FileName>HSI_init.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>.\HSI_init.s</FilePath>
+            </File>
+            <File>
+              <FileName>TIM4_IRQHandler.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>.\TIM4_IRQHandler.s</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
