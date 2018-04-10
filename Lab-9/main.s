@@ -18,6 +18,7 @@
 	IMPORT	TIM4_init
 	IMPORT	TIM4_IRQHandler
 	IMPORT	itoa
+	IMPORT	LCD_Initialization
 	ALIGN
 	ENTRY			
 				
@@ -26,6 +27,7 @@ __main	PROC
 		BL HSI_init
 		BL GPIO_init
 		BL TIM4_init
+		BL LCD_Initialization
 		
 inf		LDR r1, =timespan
 		LDR	r0, [r1]
@@ -34,9 +36,10 @@ inf		LDR r1, =timespan
 		MOV r8, #0
 		
 count2	ADD	r7, r7, #1
-		CMP	r7, #500
+		CMP	r7, #1
 		BLE	count2
-		CMP r8, #500
+		ADD	r8, r8, #1
+		CMP r8, #1
 		BLE count2
 		LDR r0, =GPIOE_BASE
 		LDR r1, [r0, #GPIO_ODR]
@@ -46,9 +49,10 @@ count2	ADD	r7, r7, #1
 		MOV r7, #0
 		MOV r8, #0
 count1	ADD	r7, r7, #1
-		CMP	r7, #500
+		CMP	r7, #1200
 		BLE	count1
-		CMP r8, #500
+		ADD	r8, r8, #1
+		CMP r8, #1200
 		BLE count1
 		LDR r0, =GPIOE_BASE
 		LDR r1, [r0, #GPIO_ODR]

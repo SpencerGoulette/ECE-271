@@ -9,6 +9,7 @@
 
 	AREA	handler, CODE
 	EXPORT	TIM4_IRQHandler
+	IMPORT	printLCD
 	IMPORT	timespan
 	IMPORT	lastcounter
 	IMPORT	overflow
@@ -31,7 +32,7 @@ TIM4_IRQHandler PROC
 				BIC r2, r2, #TIM_SR_UIF	; Clear update event flag
 				STR r2, [r0, #TIM_SR]	; Update status register
 			
-check_CCFlag	AND r2, r2, #TIM_SR_UIF ; Check capture event flag
+check_CCFlag	AND r2, r2, #TIM_SR_CC1IF ; Check capture event flag
 				CBZ r2, exit			; Compare and branch on zero
 				
 				LDR r0, =TIM4_BASE		; Load base memory address
@@ -39,18 +40,23 @@ check_CCFlag	AND r2, r2, #TIM_SR_UIF ; Check capture event flag
 				
 				LDR r2, =lastcounter
 				LDR r0, [r2]			; Load the last counter value
+				SUB r0, r1, r0
+				LDR r2,	=timespan
+				LDR r0, [r2]
+				;CBZ r0, clearOverflow	; compare and branch on zero
+				
+				;LDR r3, =overflow
+				;LDR r4, [r3]			; Load the overflow value
+				;LSL r4, r4, #16			; Multiply by 2^16
+				;ADD r6, r1, r4
+				;SUB r10, r6, r0			; r10 = timer counter difference
+				;LDR r2, =timespan
+				;STR r10, [r2]			; Update timespan memory
+				
+clearOverflow 	LDR r2, =lastcounter
 				STR r1, [r2]			; Save the new counter value
-				CBZ r0, clearOverflow	; compare and branch on zero
-				
-				LDR r3, =overflow
-				LDR r4, [r3]			; Load the overflow value
-				LSL r4, r4, #16			; Multiply by 2^16
-				ADD r6, r1, r4
-				SUB r10, r6, r0			; r10 = timer counter difference
-				LDR r2, =timespan
-				STR r10, [r2]			; Update timespan memory
-				
-clearOverflow 	MOV r0, #0
+
+				MOV r0, #0
 				LDR r3, =overflow
 				STR r0, [r3]			; Clear overflow counter
 exit			POP {r4, r6, r10, pc}

@@ -22,7 +22,7 @@ TIM4_init	PROC
 		
 		LDR r0, =TIM4_BASE
 		LDR r1, [r0, #TIM_PSC]
-		MOV r1, #159
+		MOV r1, #15
 		STR r1, [r0, #TIM_PSC]
 		
 		LDR r0, =TIM4_BASE
@@ -65,7 +65,7 @@ TIM4_init	PROC
 		STR r1, [r0, #TIM_CR1]
 		
 		MOV r0, #30
-		MOV	r1, #1
+		MOV	r1, #0
 		
 		PUSH {r4, lr}
 		LSL r2, r1, #4
@@ -73,7 +73,7 @@ TIM4_init	PROC
 		LDR r4, =NVIC_IP0
 		ADD r3, r3, r4
 		STRB r2, [r3, r0]
-		POP {r4, pc}
+		POP {r4, lr}
 		
 		MOV r0, #30
 		MOV r1, #1
@@ -85,16 +85,15 @@ TIM4_init	PROC
 		LDR r4, =NVIC_BASE
 		
 		CMP r1, #0
-		LDRNE r1, =NVIC_ICER0
+		LDRNE r1, =NVIC_ISER0
 		LDREQ r1, =NVIC_ICER0
 		
 		ADD r1, r4, r1
 		LSR r2, r0, #5
 		LSL r2, r2, #2
 		STR r3, [r1, r2]
-		POP {r4, pc}
+		POP {r4, LR}
 
-		
 		BX LR
 		
 stop 	B 		stop     ; dead loop & program hangs here
