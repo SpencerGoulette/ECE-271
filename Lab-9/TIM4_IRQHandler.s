@@ -11,8 +11,7 @@
 	EXPORT	TIM4_IRQHandler
 	IMPORT	timespan
 	IMPORT	lastcounter
-	IMPORT	overflow   
-	IMPORT	keyPad
+	IMPORT	overflow
 	ALIGN		
 
 TIM4_IRQHandler PROC

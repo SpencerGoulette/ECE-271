@@ -22,7 +22,7 @@ TIM4_init	PROC
 		
 		LDR r0, =TIM4_BASE
 		LDR r1, [r0, #TIM_PSC]
-		MOV r1, #15
+		MOV r1, #159
 		STR r1, [r0, #TIM_PSC]
 		
 		LDR r0, =TIM4_BASE
@@ -63,11 +63,37 @@ TIM4_init	PROC
 		LDR r1, [r0, #TIM_CR1]
 		ORR r1, r1, #TIM_CR1_CEN
 		STR r1, [r0, #TIM_CR1]
-	
-		LDR r2, =SCB_BASE
-		ADD r2, r2, #SCB_SHP
-		MOV r3, #1<<4
-		STRB r3, [r2, #11]
+		
+		MOV r0, #30
+		MOV	r1, #1
+		
+		PUSH {r4, lr}
+		LSL r2, r1, #4
+		LDR r3, =NVIC_BASE
+		LDR r4, =NVIC_IP0
+		ADD r3, r3, r4
+		STRB r2, [r3, r0]
+		POP {r4, pc}
+		
+		MOV r0, #30
+		MOV r1, #1
+			
+		PUSH {r4, lr}
+		AND r2, r0, #0x1F
+		MOV r3, #1
+		LSL r3, r3, r2
+		LDR r4, =NVIC_BASE
+		
+		CMP r1, #0
+		LDRNE r1, =NVIC_ICER0
+		LDREQ r1, =NVIC_ICER0
+		
+		ADD r1, r4, r1
+		LSR r2, r0, #5
+		LSL r2, r2, #2
+		STR r3, [r1, r2]
+		POP {r4, pc}
+
 		
 		BX LR
 		

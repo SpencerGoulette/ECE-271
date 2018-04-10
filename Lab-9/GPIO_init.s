@@ -7,7 +7,7 @@
 	INCLUDE core_cm4_constants.s		; Load Cortex-M4 Definitions
 	INCLUDE stm32l476xx_constants.s     ; Load STM32L4 Definitions 
 
-	AREA    main, CODE
+	AREA    GPIOinit, CODE
 	EXPORT	GPIO_init
 	ALIGN
 	ENTRY			
@@ -53,14 +53,9 @@ GPIO_init	PROC
 			STR r1, [r0, #GPIO_AFR0]
 			
 			BX LR
-		
-stop 	B 		stop     ; dead loop & program hangs here
-			
-		ENDP
-					
-		ALIGN			
+			ENDP
+			ALIGN			
 
-		AREA    myData, DATA, READWRITE
-		ALIGN
-array	DCD    1, 2, 3, 4
-		END
+			AREA    myData, DATA, READWRITE
+			ALIGN
+			END

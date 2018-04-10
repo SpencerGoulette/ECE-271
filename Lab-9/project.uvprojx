@@ -421,11 +421,6 @@
               <FilePath>.\stm32l476xx.h</FilePath>
             </File>
             <File>
-              <FileName>keyPad.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\keyPad.c</FilePath>
-            </File>
-            <File>
               <FileName>HSI_init.s</FileName>
               <FileType>2</FileType>
               <FilePath>.\HSI_init.s</FilePath>
@@ -444,6 +439,16 @@
               <FileName>TIM4_init.s</FileName>
               <FileType>2</FileType>
               <FilePath>.\TIM4_init.s</FilePath>
+            </File>
+            <File>
+              <FileName>printLCD.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\printLCD.c</FilePath>
+            </File>
+            <File>
+              <FileName>itoa.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>.\itoa.s</FilePath>
             </File>
           </Files>
         </Group>

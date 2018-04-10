@@ -9,7 +9,6 @@
 
 	AREA    hsi, CODE
 	EXPORT	HSI_init
-	IMPORT	keyPad
 	ALIGN			
 
 HSI_init  PROC
