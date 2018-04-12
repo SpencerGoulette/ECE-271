@@ -13,8 +13,7 @@ void printLCD(void);
 extern int timespan;
 
 void printLCD(void){
-	int printNumber = timespan;
-	char str[6];
-	sprintf(str, "%d", (printNumber));
+	char str[6] = {' ',' ',' ',' ',' ',' '};
+	sprintf(str, "%d", (timespan/148));
 	LCD_DisplayString((uint8_t*)str);
 }

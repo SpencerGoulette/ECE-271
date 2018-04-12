@@ -9,10 +9,9 @@
 
 	AREA	handler, CODE
 	EXPORT	TIM4_IRQHandler
-	IMPORT	printLCD
-	IMPORT	timespan
-	IMPORT	lastcounter
-	IMPORT	overflow
+	EXPORT	timespan
+	EXPORT	lastCounter
+	EXPORT	overflow
 	ALIGN		
 
 TIM4_IRQHandler PROC
@@ -38,25 +37,20 @@ check_CCFlag	AND r2, r2, #TIM_SR_CC1IF ; Check capture event flag
 				LDR r0, =TIM4_BASE		; Load base memory address
 				LDR r1, [r0, #TIM_CCR1]	; Read the new captured value
 				
-				LDR r2, =lastcounter
+				LDR r2, =lastCounter
 				LDR r0, [r2]			; Load the last counter value
-				SUB r0, r1, r0
-				LDR r2,	=timespan
-				LDR r0, [r2]
-				;CBZ r0, clearOverflow	; compare and branch on zero
-				
-				;LDR r3, =overflow
-				;LDR r4, [r3]			; Load the overflow value
-				;LSL r4, r4, #16			; Multiply by 2^16
-				;ADD r6, r1, r4
-				;SUB r10, r6, r0			; r10 = timer counter difference
-				;LDR r2, =timespan
-				;STR r10, [r2]			; Update timespan memory
-				
-clearOverflow 	LDR r2, =lastcounter
 				STR r1, [r2]			; Save the new counter value
-
-				MOV r0, #0
+				CBZ r0, clearOverflow	; compare and branch on zero
+				
+				LDR r3, =overflow
+				LDR r4, [r3]			; Load the overflow value
+				LSL r4, r4, #16			; Multiply by 2^16
+				ADD r6, r1, r4
+				SUB r10, r6, r0			; r10 = timer counter difference
+				LDR r2, =timespan
+				STR r10, [r2]			; Update timespan memory
+				
+clearOverflow 	MOV r0, #0
 				LDR r3, =overflow
 				STR r0, [r3]			; Clear overflow counter
 exit			POP {r4, r6, r10, pc}
@@ -67,4 +61,7 @@ exit			POP {r4, r6, r10, pc}
 		AREA    myData, DATA, READWRITE
 		ALIGN
 array	DCD    1, 2, 3, 4
+timespan	DCD	0
+lastCounter	DCD	0
+overflow	DCD	0
 		END

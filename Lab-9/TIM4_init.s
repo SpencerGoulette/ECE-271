@@ -27,7 +27,7 @@ TIM4_init	PROC
 		
 		LDR r0, =TIM4_BASE
 		LDR r1, [r0, #TIM_ARR]
-		MOV r1, #65536
+		MOV r1, #65535
 		STR r1, [r0, #TIM_ARR]
 		
 		LDR r0, =TIM4_BASE
@@ -92,9 +92,7 @@ TIM4_init	PROC
 		LSR r2, r0, #5
 		LSL r2, r2, #2
 		STR r3, [r1, r2]
-		POP {r4, LR}
-
-		BX LR
+		POP {r4, pc}
 		
 stop 	B 		stop     ; dead loop & program hangs here
 			
