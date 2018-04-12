@@ -35,17 +35,23 @@ GPIO_init	PROC
 			ORR r1, r1, #GPIO_MODER_MODER6_1
 			STR r1, [r0, #GPIO_MODER]
 			
+			; MODE: 00: Input mode,              01: General purpose output mode
+			;       10: Alternate function mode, 11: Analog mode (reset state)
+			; Setting GPIOE MODER
 			LDR r0, =GPIOE_BASE
 			LDR r1, [r0, #GPIO_MODER]
 			BIC r1, r1, #GPIO_MODER_MODER11
 			ORR r1, r1, #GPIO_MODER_MODER11_0
 			STR r1, [r0, #GPIO_MODER]
 			
+			; PUPDR:00: NO PUPD (reset state),   01: Pullup
+			;       10: Pulldown,                11: Reserved
 			LDR r0, =GPIOB_BASE
 			LDR r1, [r0, #GPIO_PUPDR]
 			BIC r1, r1, #GPIO_PUPDR_PUPDR6
 			STR r1, [r0, #GPIO_PUPDR]
 			
+			// Selecting the alternative function for the timer
 			LDR r0, =GPIOB_BASE
 			LDR r1, [r0, #GPIO_AFR0]
 			BIC r1, r1, #GPIO_AFRL_AFRL6

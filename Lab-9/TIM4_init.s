@@ -20,16 +20,20 @@ TIM4_init	PROC
 		ORR r1, r1, #RCC_APB1ENR1_TIM4EN
 		STR r1, [r0, #RCC_APB1ENR1]
 		
+		; Set up an appropriate prescaler to slowdown the timer's input clock
 		LDR r0, =TIM4_BASE
 		LDR r1, [r0, #TIM_PSC]
-		MOV r1, #15
+		; MOV r1, #159			 ; For the 1 Hz signal
+		MOV r1, #15				; Distance
 		STR r1, [r0, #TIM_PSC]
 		
+		; Set Auto-reload value to maximum value
 		LDR r0, =TIM4_BASE
 		LDR r1, [r0, #TIM_ARR]
 		MOV r1, #65535
 		STR r1, [r0, #TIM_ARR]
 		
+		; Set the direction of channel 1 as input, and select the active input
 		LDR r0, =TIM4_BASE
 		LDR r1, [r0, #TIM_CCMR1]
 		BIC r1, r1, #TIM_CCMR1_CC1S
@@ -37,33 +41,41 @@ TIM4_init	PROC
 		BIC r1, r1, #TIM_CCMR1_IC1F
 		STR r1, [r0, #TIM_CCMR1]
 		
+		; Both edges generate interrupts
 		LDR r0, =TIM4_BASE
 		LDR r1, [r0, #TIM_CCER]
 		ORR r1, r1, #TIM_CCER_CC1P
 		ORR r1, r1, #TIM_CCER_CC1NP
 		STR r1, [r0, #TIM_CCER]
 		
+		; Program the input prescaler: clear prescaler to capture each transition
 		LDR r0, =TIM4_BASE
 		LDR r1, [r0, #TIM_CCMR1]
 		BIC r1, r1, #TIM_CCMR1_IC1PSC
 		STR r1, [r0, #TIM_CCMR1]
 		
+		; Enable capture for channel 1
+		; CC1E: 0 = disabled, 1 = enabled
 		LDR r0, =TIM4_BASE
 		LDR r1, [r0, #TIM_CCER]
 		ORR r1, r1, #TIM_CCER_CC1E
 		STR r1, [r0, #TIM_CCER]
 		
+		; Allow channel 1 of timer 4 to generate interrupts
+		; Allow channel 1 of timer 4 to generate DMA requests
 		LDR r0, =TIM4_BASE
 		LDR r1, [r0, #TIM_DIER]
 		ORR r1, r1, #TIM_DIER_CC1IE
 		ORR r1, r1, #TIM_DIER_CC1DE
 		STR r1, [r0, #TIM_DIER]
 		
+		; Enable the timer counter
 		LDR r0, =TIM4_BASE
 		LDR r1, [r0, #TIM_CR1]
 		ORR r1, r1, #TIM_CR1_CEN
 		STR r1, [r0, #TIM_CR1]
 		
+		; Set priority of timer 4 interrupt to 0 (highest urgency)
 		MOV r0, #30
 		MOV	r1, #0
 		
@@ -75,6 +87,7 @@ TIM4_init	PROC
 		STRB r2, [r3, r0]
 		POP {r4, lr}
 		
+		; Enable timer 4 interrupt in the interrupr controller (NVIC)
 		MOV r0, #30
 		MOV r1, #1
 			

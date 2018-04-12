@@ -24,39 +24,40 @@
 				
 __main	PROC
 		
-		BL HSI_init
-		BL GPIO_init
-		BL TIM4_init
-		BL LCD_Initialization
+		BL HSI_init						;Initialize HSI clock
+		BL GPIO_init					;Initialize GPIOs
+		BL TIM4_init					;Initialize TIM4
+		BL LCD_Initialization			;Initialize LCD
 		
 inf		MOV r7, #0
 		MOV r8, #0
 		
-count2	ADD	r7, r7, #1
+count2	ADD	r7, r7, #1					;Wait
 		CMP	r7, #600
 		BLE	count2
 		ADD	r8, r8, #1
 		CMP r8, #600
 		BLE count2
-		LDR r0, =GPIOE_BASE
+		LDR r0, =GPIOE_BASE				;Trigger 
 		LDR r1, [r0, #GPIO_ODR]
 		ORR r1, r1, #GPIO_ODR_ODR_11
 		STR r1, [r0, #GPIO_ODR]
 		
 		MOV r7, #0
 		MOV r8, #0
-count1	ADD	r7, r7, #1
+		
+count1	ADD	r7, r7, #1					;Wait
 		CMP	r7, #600
 		BLE	count1
 		ADD	r8, r8, #1
 		CMP r8, #600
 		BLE count1
-		LDR r0, =GPIOE_BASE
+		LDR r0, =GPIOE_BASE				;Trigger
 		LDR r1, [r0, #GPIO_ODR]
 		BIC r1, r1, #GPIO_ODR_ODR_11
 		STR r1, [r0, #GPIO_ODR]
 		LDR	r0, [r1]
-		BL printLCD
+		BL printLCD						;Print Distance
 		B inf	;infinite while loop
 		
 stop 	B 		stop     ; dead loop & program hangs here
