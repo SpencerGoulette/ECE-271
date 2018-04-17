@@ -34,10 +34,12 @@ int main(void){
 	
 	// MODER:00: Input mode,              01: General purpose output mode
   //       10: Alternate function mode, 11: Analog mode (reset state)
-  GPIOA->MODER &= ~GPIO_MODER_MODE1;
-  GPIOA->MODER |= GPIO_MODER_MODE1;   // Set mode to analog
+  GPIOA->MODER &= ~(GPIO_MODER_MODE1 | GPIO_MODER_MODE2);
+  GPIOA->MODER |= GPIO_MODER_MODE1 | GPIO_MODER_MODE2_0;   // Set mode to analog
 	
 	GPIOA->ASCR |= GPIO_ASCR_ASC1;	// Set bit 1 in ASCR to close the analog switch
+	
+	GPIOA->ODR |= GPIO_ODR_ODR_2;
 	
 	ADC_init();
 	
@@ -45,11 +47,11 @@ int main(void){
 	{
 		ADC1->CR |= ADC_CR_ADSTART;
 		while((ADC123_COMMON->CSR & ADC_CSR_EOC_MST) !=  ADC_CSR_EOC_MST);
-		if(ADC1->DR/13 > 200)
+		if(ADC1->DR/13 < 285)
 		{
 			GPIOB->ODR |= GPIO_ODR_ODR_2;
 		}
-		else if(ADC1->DR/13 < 100)
+		else if(ADC1->DR/13 > 285)
 		{
 			GPIOB->ODR &= ~GPIO_ODR_ODR_2;
 		}
