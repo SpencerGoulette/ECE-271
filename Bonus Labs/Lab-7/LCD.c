@@ -77,6 +77,7 @@ uint8_t positionCounter;
 uint8_t mult1;
 uint8_t mult2;
 uint16_t previousInput;
+uint8_t colon;
 
 #define BAR0_ON  t_bar[1] |= 8
 #define BAR0_OFF t_bar[1] &= ~8
@@ -204,7 +205,15 @@ void LCD_PIN_Init(void){
 void LCD_DisplayString(uint8_t* ptr){
 	for(positionNumber2 = 0; positionNumber2 < 6; positionNumber2++)	//Runs 6 times for the 6 character limit
 	{
-		LCD_WriteChar(ptr + positionNumber2, 0, 0, positionNumber2);	//Writes each character to the LCD display in the right position using the predefined function 
+		if((positionNumber2 % 2) == 1)
+		{
+			colon = 1;
+		}
+		else
+		{
+			colon = 0;
+		}
+		LCD_WriteChar(ptr + positionNumber2, 0, colon, positionNumber2);	//Writes each character to the LCD display in the right position using the predefined function 
 	}
 }
 

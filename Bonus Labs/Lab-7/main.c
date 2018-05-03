@@ -2,26 +2,49 @@
 #include "lcd.h"
 
 /* Spencer Goulette
-	 03/01/18
-	 ECE 271 LAB6
-	 Objective: Get LED to blink with
-	 Pins: Port B pins used for red LED
-	 Clock Frequency: 8MHz
-	 SysTick Clock Frequency: 1MHz
+	 05/03/18
+	 ECE 271 Bonus lab 7
+	 Objective: Get RTC to blink LED every second and show time (also date for bonus)
+	 Pins: Port B pins used for red LED and EXTI3 used for date and EXTI20 used for interrupt for RTC and Alarm interrupt used to toggle every second
+	 Clock Frequency: 16MHz
+	 LSE: 32.768KHz
 */
 
+void System_Clock_Init(void);
 void LCD_RTC_Clock_Enable(void);
 void EXTI_Init(void);
-void EXTI20_IRQHandler(void);
 void RTC_Init(void);
 void RTC_Set_Alarm(void);
 void RTC_Alarm_Enable(void);
 void RTC_Alarm_IRQHandler(void);
 void Enter_SleepMode(void);
 void RTC_Wakeup_Configuration(void);
+void EXTI_Init(void);
+void EXTI3_IRQHandler(void);
+
+uint32_t time;	// Variable for the time
+uint32_t date;	// Variable for the date
+uint8_t showTime = 1;	// To figure out whether to show the time or date
+char str[6] = {' ',' ',' ',' ',' ',' '};
 
 int main(void)
 {	
+	LCD_Initialization();	// Initialize everything needed
+	System_Clock_Init();
+	EXTI_Init();
+	
+	// Enable the clock to GPIO Port A	
+  RCC->AHB2ENR |= RCC_AHB2ENR_GPIOAEN;   
+
+	// MODER:00: Input mode,              01: General purpose output mode
+  //       10: Alternate function mode, 11: Analog mode (reset state)
+  GPIOA->MODER &= ~0x00000CFF;   // Clear bits 0-7, and bit 10 and bit 11
+  
+  // PUPDR:00: NO PUPD (reset state),   01: Pullup
+  //       10: Pulldown,                11: Reserved
+	GPIOA->PUPDR &= ~0x00000CFF;  // Clear bits 0-7, and bit 10 and bit 11
+	GPIOA->PUPDR |= 0x000008AA; // Set bits 1, 3, 5, 7, and 11
+	
 	// Enable the clock to GPIO Port B	
   RCC->AHB2ENR |= RCC_AHB2ENR_GPIOBEN;   
 
@@ -34,14 +57,32 @@ int main(void)
   //       10: Pulldown,                11: Reserved
 	GPIOB->PUPDR &= ~0x00000030;  // Clear bit 4 and bit 5
 	GPIOB->ODR ^= GPIO_ODR_ODR_2;
-	RTC_Alarm_Enable();
-	RTC_Set_Alarm();
-	//RTC_Wakeup_Configuration();
+	RTC_Alarm_Enable();	// Enable the RTC alarm
+	RTC_Set_Alarm();	// Set RTC alarm so it will go off every second
+	RTC_Wakeup_Configuration();
 	while(1)
 	{
-		//Enter_SleepMode();
+		Enter_SleepMode(); // Used to save power
 	}
-}	
+}
+
+void System_Clock_Init(void){
+	
+	// Enable High Speed Internal Clock (HSI = 16 MHz)
+  RCC->CR |= ((uint32_t)RCC_CR_HSION);
+	
+  // wait until HSI is ready
+  while ( (RCC->CR & (uint32_t) RCC_CR_HSIRDY) == 0 );
+	
+  // Select HSI as system clock source 
+  RCC->CFGR &= (uint32_t)((uint32_t)~(RCC_CFGR_SW));
+  RCC->CFGR |= (uint32_t)RCC_CFGR_SW_HSI;  //01: HSI16 oscillator used as system clock
+
+  // Wait till HSI is used as system clock source 
+  while ((RCC->CFGR & (uint32_t)RCC_CFGR_SWS) == 0 );
+		
+}
+
 void LCD_RTC_Clock_Enable(void)
 {
 	// Enable write access to the backup domain
@@ -83,6 +124,7 @@ void LCD_RTC_Clock_Enable(void)
 	// RTCSEL[1:0]: 00 = No Clock, 01 - LSE, 10 = LSI, 11 = HSE
 	RCC->BDCR &= ~RCC_BDCR_RTCSEL; // Clear RTCSEL bits
 	RCC->BDCR |= RCC_BDCR_RTCSEL_0; // Select LSE as RTC clock
+	RCC->BDCR |= RCC_BDCR_RTCEN;
 	
 	// Disable power interface clock
 	RCC->APB1ENR1 &= ~RCC_APB1ENR1_PWREN;
@@ -95,6 +137,9 @@ void RTC_Init(void)
 {
 	// Enable RTC Clock
 	LCD_RTC_Clock_Enable();
+	
+	// Enable power interface clock
+	RCC->APB1ENR1 |= RCC_APB1ENR1_PWREN;
 	
 	// Disable write protection of RTC registers by writing disarm keys
 	RTC->WPR = 0xCA;
@@ -117,7 +162,7 @@ void RTC_Init(void)
 	RTC->TR = ((0<<22) | (1<<20) | (1<<16) | (3<<12) | (2<<8));
 	
 	// Set date as 2016/05/27
-	RTC->DR = ((1<<20) | (6<<16) | (0<<12) | (5<<8) | (2<<4) | (7));
+	RTC->DR = ((1<<20) | (8<<16) | (0<<12) | (5<<8) | (0<<4) | (3));
 	
 		// Hour format: 0 = 24 hour/day; 1 = AM/PM hour
 	RTC->CR &= ~RTC_CR_FMT;
@@ -155,13 +200,13 @@ void RTC_Set_Alarm(void)
 	// Set off alarm A if the seconds is 30
 	// Bits[6:4] = Ten's digit for the second in BCD format
 	// Bits[3:0] = Unit's digit for the second in BCD format
-	AlarmTimeReg = 0x3 << 4;
+	AlarmTimeReg = 0;
 	
 	// Set alarm mask field to compare only the second
 	AlarmTimeReg |= RTC_ALRMBR_MSK4;	// 1: Ignore day of week in comparison
 	AlarmTimeReg |= RTC_ALRMBR_MSK3;	// 1: Ignore hour in comparison
 	AlarmTimeReg |= RTC_ALRMBR_MSK2;	// 1: Ignore m inute in alarm comparison
-	AlarmTimeReg &= ~RTC_ALRMBR_MSK1;	// 0: Alarm sets off if the seconds match
+	AlarmTimeReg |= RTC_ALRMBR_MSK1;	// 1: Alarm sets off every second
 	
 	// RTC alarm A register (ALRMAR)
 	RTC->ALRMBR = AlarmTimeReg;
@@ -208,7 +253,22 @@ void RTC_Alarm_IRQHandler(void)
 	
 	if(RTC->ISR & RTC_ISR_ALRBF)
 	{
+		// Turns TR and DR into 6 digit numbers
+		time = (RTC->TR & 0xF) + (((RTC->TR & 0x70) >> 4) * 10) + (((RTC->TR & 0xF00) >> 8) * 100) + (((RTC->TR & 0x7000) >> 12) * 1000) + (((RTC->TR & 0xF0000) >> 16) * 10000) + (((RTC->TR & 0x300000) >> 20) * 100000);
+		date = ((RTC->DR & 0xF0000) >> 16) + (((RTC->DR & 0xF00000) >> 20) * 10) + ((RTC->DR & 0xF) * 100) + (((RTC->DR & 0x03) >> 4) * 1000) + (((RTC->DR & 0xF00) >> 8) * 10000) + (((RTC->DR & 0x1000) >> 12) * 100000);
 		
+		//Figures out whether to display time or date
+		if(showTime == 1)
+		{
+			sprintf(str, "%6d", time);
+		}
+		else
+		{
+			sprintf(str, "%6d", date);
+		}
+		
+		// Display
+		LCD_DisplayString(str);
 		GPIOB->ODR ^= GPIO_ODR_ODR_2;	// Toggle the GPIO PB.2
 		RTC->ISR &= ~(RTC_ISR_ALRBF); // Clear alarm A interrupt flag
 	}
@@ -269,16 +329,48 @@ void Enter_SleepMode(void)
 	__WFI();	// Switch Processor into the sleep mode
 }
 
-void EXTI120_IRQHandler(void)
+void EXTI_Init(void)
 {
-	// Check for EXTI 3 interrupt flag
-	if((EXTI->PR1 & EXTI_PR1_PIF20) == EXTI_PR1_PIF20)
-	{
-		// Toggle LED
-		GPIOB->ODR ^= GPIO_ODR_ODR_2;
-		
-		// Clear interrupt pending request
-		EXTI->PR1 |= EXTI_PR1_PIF20;
-	}
+	// Enable SYSCFG clock
+	RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;
+	
+	// Select PA.3 as the trigger source of EXTI 3
+	SYSCFG->EXTICR[0] &= ~SYSCFG_EXTICR1_EXTI3;
+	SYSCFG->EXTICR[0] |= SYSCFG_EXTICR1_EXTI3_PA;
+	SYSCFG->EXTICR[0] &= ~(0x000F);
+	
+	// Enable rising edge trigger for EXTI3
+	// Rising trigger selection register (RSTR)
+	// 0 = disabled, 1 = enabled
+	EXTI->RTSR1 |= EXTI_RTSR1_RT3;
+	
+	// Disable falling edge trigger for EXTI3
+	// Falling trigger selection register (FSTR)
+	// 0 = disabled, 1 = enabled
+	EXTI->FTSR1 &= ~EXTI_FTSR1_FT3;
+	
+	// Enable EXTI 3 interrupt
+	// Interupt mask register: 0 = masked, 1 = unmasked
+	// "Masked" means that processor ignores the corresponding interrupt.
+	EXTI->IMR1 |= EXTI_IMR1_IM3;
+	
+	// Enable EXTI 3 interrupt
+	NVIC_EnableIRQ(EXTI3_IRQn);
+	
+	// Set EXTI 3 priority to 1
+	NVIC_SetPriority(EXTI3_IRQn, 1);
+	
 }
 
+void EXTI3_IRQHandler(void)
+{
+	// Check for EXTI 3 interrupt flag
+	if((EXTI->PR1 & EXTI_PR1_PIF3) == EXTI_PR1_PIF3)
+	{
+		// Toggle LED
+		showTime ^= 0x1;
+		
+		// Clear interrupt pending request
+		EXTI->PR1 |= EXTI_PR1_PIF3;
+	}
+}
