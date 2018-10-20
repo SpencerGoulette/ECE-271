@@ -1,0 +1,18 @@
+ECE-271 Labs
+
+Labs:
+1. Toggle LED in C
+2. Joystick and LCD Display in C
+3. LCD Display and Keypad in C
+4. Rotate Stepper Motor in C
+5. Rotate Stepper Motor in Assembly
+6. LED Blink with Systick Interrupt Delay in C
+7. Rotate Motor and Dim LED in C
+8. Distance Sensor in C
+9. Rotate Motor Specified Degrees in Assembly and C
+10. ADC to Detect Voltage Level in C
+
+Bonus Lab:
+7. External Interrupt
+8. Real Time Clock
+
